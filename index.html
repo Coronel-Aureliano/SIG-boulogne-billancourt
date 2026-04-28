@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Commune SIG</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    #map { height: 100vh; margin: 0; }
+    body { margin: 0; }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+  const map = L.map('map').setView([48.85, 2.35], 10);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap'
+  }).addTo(map);
+
+  fetch('plu-de-gpso.geojson')
+    .then(res => res.json())
+    .then(data => {
+      const layer = L.geoJSON(data, {
+        style: {
+          color: "blue",
+          weight: 2,
+          fillOpacity: 0
+        }
+      }).addTo(map);
+
+      map.fitBounds(layer.getBounds());
+    });
+</script>
+
+</body>
+</html>
