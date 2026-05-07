@@ -3,38 +3,34 @@
 <head>
   <meta charset="utf-8" />
   <title>Commune SIG</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
-    #map { height: 100vh; margin: 0; }
-    body { margin: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      text-align: center;
+    }
+    img {
+      max-width: 90%;
+      height: auto;
+      border: 1px solid #ccc;
+    }
+    p {
+      margin-top: 15px;
+      font-size: 18px;
+    }
   </style>
 </head>
 <body>
 
-<div id="map"></div>
+  <h1>Le Quartier du Trapèze à Boulogne-Billancourt : une requalification socialement réussie ?</h1>
+  
+  <p>
+    Le sud-ouest de Boulogne-Billancourt a accueilli, entre 1898 et 1992 un important site de production de Renault. La fermeture du site a suscité un ambitieux projet de requalification, visant à le remplacer par un éco-quartier capable de faire face à d'éventuelles crues, car il s'agit d'une zone innondable. Les projets de requalification sont souvent critiqués en ce qu'ils nourrissent des phénomènes de gentrification. Il convient donc de se demander si le Quartier du Trapèze échappe à la règle ou non. 
+  </p>
+  
+  <img src="Mise-en-page2.jpg" alt="Mise en page">
 
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script>
-  const map = L.map('map').setView([48.85, 2.35], 10);
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap'
-  }).addTo(map);
-
-  fetch('plu-de-gpso.geojson')
-    .then(res => res.json())
-    .then(data => {
-      const layer = L.geoJSON(data, {
-        style: {
-          color: "blue",
-          weight: 2,
-          fillOpacity: 0
-        }
-      }).addTo(map);
-
-      map.fitBounds(layer.getBounds());
-    });
-</script>
 
 </body>
 </html>
