@@ -1,0 +1,284 @@
+---
+title: "Le Quartier du Trapèze à Boulogne-Billancourt : une requalification socialement réussie ?"
+author: "BoulogneTransition"
+date: "2026"
+output: html_document
+---
+
+
+# Présentation du projet 
+
+*Étude réalisée par Valentine Danielou et Aurélien Sénard*
+
+*Mai 2026*
+
+
+Boulogne-Billancourt est une commune française des Hauts-de-Seine (92), située en bordure de Seine à l'ouest (région Île-de-france). Avec ses 120 000 habitants environ sur seulement 6,2 km², elle est l'une des villes les plus denses de France (INSEE, 2021). Son territoire est historiquement marqué par la présence de l'industrie automobile : l'usine Renault, implantée dès 1898 sur les bords de Seine et sur l'Île Seguin, a longtemps constitué le cœur économique et social de la commune, employant jusqu'à 30 000 ouvriers à son apogée (Renault, 2005). Depuis sa fermeture définitive en 1992 et ce vide industriel (74 hectares), la municipalité a engagé un vaste projet de requalification urbaine, donnant naissance au Quartier du Trapèze : un nouveau quartier mixte, pensé comme un éco-quartier résilient, intégrant logements, bureaux et espaces verts. Ce type d'opération est aujourd'hui au cœur des débats en urbanisme : si la requalification de friches industrielles permet de redynamiser un territoire, elle est aussi fréquemment associée à des phénomènes de gentrification, c'est-à-dire au remplacement progressif des populations modestes par des ménages plus aisés, sous l'effet de la hausse des prix immobiliers. À Boulogne-Billancourt, le prix au m² dépasse aujourd'hui 9 000 € en moyenne, soit parmi les plus élevés de la petite couronne parisienne.
+
+C'est dans ce contexte que ce travail s'interroge : le Quartier du Trapèze constitue-t-il une requalification socialement réussie, ou reproduit-il les mécanismes d'exclusion souvent observés dans ce type de projet urbain ?
+
+
+
+
+# Données 
+Notre analyse repose sur l'hybridation de sources hétérogènes, traitées sous RStudio et ArcGIS. Le socle socio-économique provient de la base Filosofi de l'INSEE, dont les données carroyées à 200 mètres sur le nombre de ménages pauvres nous ont permis de spatialiser la pauvreté à une échelle infra-communale entre 2015 et 2021, révélant des dynamiques invisibles à l'échelle des moyennes administratives habituelles. La dimension environnementale et hydraulique est quant à elle issue du Plan de Prévention des Risques Naturels des Hauts-de-Seine (data.gouv.fr), traité sous forme vectorielle sous RStudio pour cartographier les niveaux d'aléa inondation sur l'ensemble du territoire communal. Les espaces verts ont été extraits de la base OpenStreetMap par sélection des entités qualifiées de « park », tandis que le périmètre du Quartier du Trapèze a été reconstitué manuellement sous ArcGIS, faute de données officielles disponibles. Enfin, un carroyage à 200 mètres de la commune de Boulogne-Billancourt complète le dispositif en offrant une maille d'analyse homogène, permettant de croiser les dimensions sociales et spatiales à une échelle fine et cohérente avec les données Filosofi. L'ensemble de ces sources nous a permis de descendre à une échelle infra-quartier pour interroger les dynamiques sociales à l'œuvre dans le Trapèze au-delà des discours institutionnels sur la mixité
+
+
+
+
+
+#### Cadastre de la commune de Boulogne-Billancourt (92100)
+
+```{r echo=FALSE, out.width="80%"}
+knitr::include_graphics("cadastreboulogne.png")
+```
+
+
+
+
+##### Code utilisé
+```{r, eval=FALSE}
+library(sf)
+library(mapsf)
+library(httr)
+list.files("C:/Users/DANIELOU/OneDrive/Bureau/valentine dossier/R studio/Devoir_SIG/data/Filosofi2019_carreaux_200m_gpkg")
+carreaux <- st_read("C:/Users/DANIELOU/OneDrive/Bureau/valentine dossier/R studio/Devoir_SIG/data/Filosofi2019_carreaux_200m_gpkg/carreaux_200m_met.gpkg")
+
+# Télécharger la limite de Boulogne-Billancourt
+download.file("https://geo.api.gouv.fr/communes/92012?format=geojson&geometry=contour", destfile = "C:/Users/DANIELOU/OneDrive/Bureau/valentine dossier/R studio/Devoir_SIG/data/boulogne.geojson")
+boulogne <- st_read("C:/Users/DANIELOU/OneDrive/Bureau/valentine dossier/R studio/Devoir_SIG/data/boulogne.geojson")
+
+# Reprojeter Boulogne en Lambert-93 pour correspondre aux carreaux
+boulogne_l93 <- st_transform(boulogne, crs = 2154)
+
+# Découper les carreaux sur Boulogne-Billancourt
+carreaux_boulogne <- st_intersection(carreaux, boulogne_l93)
+
+# Afficher la carte
+dev.new()
+mf_map(carreaux_boulogne)
+mf_map(boulogne_l93, add = TRUE, col = NA, border = "red", lwd = 2)
+mf_title("Carroyage Filosofi 200m - Boulogne-Billancourt")
+carreaux_boulogne_save <- carreaux_boulogne[, !sapply(st_drop_geometry(carreaux_boulogne), is.list)]
+st_write(carreaux_boulogne_save, "C:/Users/DANIELOU/OneDrive/Bureau/valentine dossier/R studio/Devoir_SIG/data/carreaux_boulogne.gpkg", delete_dsn = TRUE)
+```
+
+
+
+
+#### Carte du quartier du Trapèze 
+
+Aucune donnée officielle sur les périmètres de quartier n'étant mise à disposition par la commune de Boulogne-Billancourt ni par l'intercommunalité du Grand Paris Seine Ouest, le périmètre du Trapèze a été reconstitué manuellement sous ArcGIS, à l'aide d'un plan de la ZAC disponible sur le site de la commune. Ce géotraitement vectoriel, bien que tributaire d'une source iconographique, permet de délimiter avec une précision suffisante l'emprise du quartier étudié. 
+```{r echo=FALSE, out.width="100%"}
+knitr::include_graphics("quartiertrapeze.png")
+```
+*Carte réalisée avec le logiciel Arcgis*
+
+
+
+
+#### Librairies
+
+```{r, eval=FALSE}
+library(sf)
+library(mapsf)
+library(httr)
+library(happign)
+```
+
+
+
+
+#### Tableaux des données 
+
+```{r echo=FALSE, out.width="100%"}
+knitr::include_graphics("tableaudedonnees.png")
+```
+
+#### Liens des données (ordre du tableau)
+
+https://www.insee.fr/fr/statistiques/8735243
+
+https://www.insee.fr/fr/statistiques/7655475?sommaire=7655515
+
+https://www.insee.fr/fr/statistiques/6215138?sommaire=6215217
+
+https://www.insee.fr/fr/statistiques/4176290?sommaire=4176305
+
+https://data.seineouest.fr/explore/dataset/limites-dagglomeration/information/?disjunctive.commune
+
+https://www.data.gouv.fr/datasets/plan-de-prevention-des-risques-naturels-inondation-aleas-departement-des-hauts-de-seine
+
+
+
+
+
+# Géotraitement vectoriels
+
+
+
+### Analyse (risque inondation)
+La carte ci-dessous, issue d'un géotraitement vectoriel réalisé sous R à partir des données du Plan de Prévention des Risques Naturels des Hauts-de-Seine (data.gouv.fr), représente la répartition des niveaux d'aléa inondation sur le territoire communal de Boulogne-Billancourt. Elle met clairement en évidence que la frange ouest de la commune, correspondant au secteur du Trapèze et des bords de Seine, concentre les niveaux d'aléa les plus élevés (allant de fort à très fort). Ce quartier est donc structurellement exposé au risque de crue, ce qui aurait pu constituer un frein majeur à sa requalification. Or, la gestion du risque inondation a été intégrée dès la conception du projet comme une contrainte centrale de l'aménagement. Le parc du Trapèze, positionné au cœur de la ZAC sur les anciens terrains Renault, a été conçu avant tout comme un réceptacle permettant de stocker les crues de la Seine et les eaux pluviales. On y toruve des toitures végétalisées jouant le rôle de zones tampon, des surfaces minimales de pleine terre imposées en cœur d'îlot, et des sous-sols de parkings rendus inondables pour servir de bassins de stockage. L'allée Robert Doisneau par exemple, dédiée aux piétons et aux vélos, est quant à elle bordée d'un réseau de noues qui récupère et filtre les eaux de pluie.
+Ce dispositif technique ambitieux illustre une approche de "ville éponge" qui transforme la contrainte hydraulique en atout paysager. Le quartier a d'ailleurs été l'un des premiers en France à recevoir, en 2013, le label ÉcoQuartier décerné par l'État. La résilience face au risque inondation apparaît ainsi comme l'une des conditions qui a rendu possible et légitime la requalification de ce secteur et, par extension, son attractivité croissante, dont il faut désormais interroger les effets sociaux.
+
+
+
+#### Carte
+
+```{r echo=FALSE, out.width="100%"}
+knitr::include_graphics("carteinondation.png")
+```
+
+
+
+#### Code utilisé
+
+```{r, eval=FALSE}
+[library(sf)
+library(mapsf)
+library(happign)
+
+mon_shapefile <- st_read("D:\Danielou\SIG\R studio\Devoir_SIG\Data\carte innondation\dataset\N_ZONE_ALEA_PPRN_20170002_S_092.shp")
+boulogne_limite <- get_apicarto_cadastre("92012")
+
+mon_shapefile <- st_make_valid(mon_shapefile)
+boulogne_limite <- st_make_valid(st_transform(boulogne_limite, st_crs(mon_shapefile)))
+aleas_boulogne <- st_intersection(st_buffer(mon_shapefile, 0), st_buffer(boulogne_limite, 0))
+
+niveaux_ordre <- c(
+  "5 aléa très fort",
+  "4 aléa fort",
+  "3 aléa fort",
+  "2 aléa faible - zones dites d'autres aléas",
+  "1 aléa faible - zones dites d'autres aléas"
+)
+
+aleas_boulogne$LABEL <- factor(
+  aleas_boulogne$LABEL, 
+  levels = niveaux_ordre, 
+  ordered = TRUE
+)
+
+ma_palette <- mf_get_pal(n = 5, palette = "YlOrRd")
+
+if(!is.null(dev.list())) dev.off()
+mf_theme("default")
+
+mf_map(
+  x = aleas_boulogne, 
+  var = "LABEL", 
+  type = "typo", 
+  pal = ma_palette, 
+  val_order = niveaux_ordre, 
+  border = NA,
+  leg_title = "Niveaux d'aléa" 
+)
+
+mf_map(
+  x = boulogne_limite, 
+  col = NA, 
+  border = "black", 
+  lwd = 2, 
+  add = TRUE
+)
+
+mf_title("Répartition de l'aléa inondation à Boulogne-Billancourt")
+mf_arrow(pos = "topleft")
+mf_scale(pos = "bottomright")
+mf_credits(
+  txt = "Source : Plan de Prévention des Risques Naturels Hauts-de-Seine",
+  pos = "bottomleft",
+  col = "white",
+  bg = "black",
+  cex = 0.7
+)
+```
+
+
+
+
+### Analyse (esapces verts)
+
+Réalisée à partir des données OpenStreetMap en sélectionnant les entités qualifiées de « park » sur le territoire communal, cette carte met en évidence la concentration d'espaces verts dans le secteur du Trapèze. Comme évoqué précédemment, ces aménagements remplissent une fonction hydraulique essentielle face au risque de crue. Mais au-delà de cette dimension technique, ils constituent également une aménité urbaine de premier plan : la proximité d'espaces verts de qualité est en effet documentée comme l'un des facteurs contribuant à la hausse des valeurs foncières. La carte prépare ainsi le terrain pour interroger, à travers les données sociales qui suivent, si cette requalification paysagère s'est accompagnée d'une transformation de la composition sociale du quartier.
+
+
+
+
+#### Carte
+```{r echo=FALSE, out.width="100%"}
+knitr::include_graphics("carteespacevert.png")
+```
+
+
+
+
+#### Code utilisé
+
+```{r, eval=FALSE}
+library(sf)
+library(osmdata)
+library(ggplot2)
+
+# 2. Chargement des limites de Boulogne-Billancourt (GeoJSON)
+limites <- st_read("limites-dagglomeration.geojson")
+
+# (sécurité : projection GPS)
+limites <- st_transform(limites, 4326)
+
+# 3. Définition de la zone d'étude (bounding box)
+bbox <- st_bbox(limites)
+
+# 4. Récupération des espaces verts depuis OpenStreetMap
+query_parks <- opq(bbox = bbox) |>
+  add_osm_feature(key = "leisure", value = "park")
+
+parks <- osmdata_sf(query_parks)$osm_polygons
+
+# 5. Nettoyage spatial : garder uniquement les éléments dans la commune
+parks_boulogne <- st_intersection(parks, limites)
+
+# 6. Création de la carte statique
+map <- ggplot() +
+  geom_sf(data = limites, fill = "white", color = "black", linewidth = 1) +
+  geom_sf(data = parks_boulogne, fill = "green", color = NA, alpha = 0.6) +
+  theme_void()
+```
+
+
+
+
+
+# Géotraitements rasters 
+
+
+
+
+#### Analyse
+
+La carte de données carroyées Filosofi (INSEE) représente l'évolution du nombre de ménages pauvres à Boulogne-Billancourt entre 2015 et 2021, à une résolution de 200 mètres. Ce géotraitement raster, réalisé sous ArcGIS par discrétisation par quantiles, permet de visualiser la distribution spatiale de la pauvreté sur l'ensemble du territoire communal à quatre dates distinctes. À l'observation, la répartition des carreaux à forte concentration de ménages pauvres ne montre pas de basculement net vers le sud-ouest de la commune (secteur du Trapèze) sur la période étudiée. Cette relative stabilité suggère que la requalification du quartier n'a pas entraîné une éviction massive des populations les plus fragiles, contrairement à ce que l'on observe fréquemment dans ce type d'opération. Plusieurs éléments de programmation urbaine peuvent expliquer ce résultat. Dès la conception de la ZAC Île Seguin–Rives de Seine, la mixité sociale a été inscrite comme priorité : 33 % des logements du Trapèze sont à vocation sociale, soit près de 1 980 logements sociaux sur un total d'environ 4 800 logements prévus. À cela s'ajoute le maintien d'un foyer de travailleurs migrants et le développement de résidences étudiantes dans le secteur sud, contribuant à préserver une certaine hétérogénéité sociale. Le label ÉcoQuartier obtenu par le Trapèze a notamment valorisé la mixité sociale et fonctionnelle de sa programmation
+
+
+
+
+#### Carte 
+
+```{r echo=FALSE, out.width="100%"}
+knitr::include_graphics("cartepauvreteboulogne.png")
+```
+*Carte réalisée avec le logiciel Arcgis*
+
+
+
+#### Schéma de géotraitement 
+
+```{r echo=FALSE, out.width="100%"}
+knitr::include_graphics("schemageotraitement.png")
+```
+
+
+
+# Conclusion
+
+Au terme de cette analyse cartographique et sociale, le Quartier du Trapèze apparaît comme une requalification urbaine qui échappe, au moins partiellement, aux logiques de gentrification habituellement associées à ce type d'opération. La coexistence, sur un même territoire, d'un tiers de logements sociaux, d'équipements publics structurants et d'un système de gestion hydraulique intégré témoigne d'une volonté politique d'articuler performance environnementale et maintien de la mixité sociale, deux objectifs que les projets urbains contemporains peinent souvent à concilier.
+Pour autant, la prudence s'impose. Les données Filosofi analysées couvrent une période encore courte au regard des temporalités longues de la gentrification, et la pression foncière qui s'exerce sur Boulogne-Billancourt (l'une des communes les plus chères de la petite couronne) n'a pas disparu. Les espaces verts et aménités paysagères du Trapèze, tout en jouant un rôle hydraulique indispensable, constituent également des facteurs d'attractivité susceptibles d'alimenter, à terme, une recomposition sociale progressive.
+Le Trapèze constitue ainsi moins un modèle achevé qu'un cas d'étude précieux : celui d'une friche industrielle reconvertie avec ambition, dont le bilan social reste ouvert, et dont la trajectoire mérite d'être suivie sur le long terme pour déterminer si la réussite affichée résistera aux dynamiques de marché qui caractérisent le Grand Paris.
